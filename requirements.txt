@@ -1,0 +1,39 @@
+# Core Flask
+Flask==3.0.0
+Werkzeug==3.0.1
+Flask-SQLAlchemy==3.1.1
+Flask-WTF==1.2.1
+Flask-Migrate==4.0.5
+python-dotenv==1.0.0
+
+# Database
+SQLAlchemy==2.0.23
+mysql-connector-python==8.2.0
+Flask-MySQLdb==1.0.1
+
+# Forms and Security
+WTForms==3.1.1
+email-validator==2.1.0.post1
+Flask-Login==0.6.3
+Flask-Bcrypt==1.0.1
+
+# API and Serialization
+Flask-RESTful==0.3.10
+marshmallow==3.20.1
+marshmallow-sqlalchemy==1.1.0
+
+# Utilities
+pandas==2.1.4
+numpy==1.26.3
+python-dateutil==2.8.2
+pytz==2023.3.post1
+
+# PDF Generation
+reportlab==4.0.9
+PyPDF2==3.0.1
+
+# Development
+pytest==7.4.3
+pytest-cov==4.1.0
+black==23.11.0
+flake8==6.1.0

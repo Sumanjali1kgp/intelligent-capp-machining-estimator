@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Parts - {{ job.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Parts for Job: {{ job.name }}</h2>
+        <div>
+            <a href="{{ url_for('job.list_jobs') }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left"></i> Back to Jobs
+            </a>
+            <button id="add-part-btn" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add Part
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="text-center my-4" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading, please wait...</p>
+    </div>
+
+    <!-- Parts Container -->
+    <div id="parts-container" class="mb-5">
+        <!-- Parts will be loaded here by JavaScript -->
+    </div>
+</div>
+
+<!-- Add/Edit Part Modal -->
+<div class="modal fade" id="partModal" tabindex="-1" aria-labelledby="partModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-part-title">Add New Part</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="part-form">
+                <input type="hidden" id="part-id" value="">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="part-name" class="form-label">Part Name *</label>
+                        <input type="text" class="form-control" id="part-name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="material-cost" class="form-label">Material Cost (₹)</label>
+                        <input type="number" class="form-control" id="material-cost" min="0" step="0.01" value="0">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="save-part-btn">Save Part</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Operation Modal -->
+<div class="modal fade" id="operationModal" tabindex="-1" aria-labelledby="operationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-operation-title">Add New Operation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="operation-form">
+                <input type="hidden" id="operation-id" value="">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="operation-name" class="form-label">Operation Name *</label>
+                        <input type="text" class="form-control" id="operation-name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="operation-type" class="form-label">Operation Type *</label>
+                        <select class="form-select" id="operation-type" required>
+                            <option value="turning">Turning</option>
+                            <option value="milling">Milling</option>
+                            <option value="drilling">Drilling</option>
+                            <option value="facing">Facing</option>
+                            <option value="boring">Boring</option>
+                            <option value="threading">Threading</option>
+                            <option value="knurling">Knurling</option>
+                            <option value="parting">Parting</option>
+                            <option value="reaming">Reaming</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="machining-time" class="form-label">Machining Time (min) *</label>
+                            <input type="number" class="form-control" id="machining-time" min="0" step="0.01" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="machining-cost" class="form-label">Machining Cost (₹) *</label>
+                            <input type="number" class="form-control" id="machining-cost" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tooling-cost" class="form-label">Tooling Cost (₹)</label>
+                        <input type="number" class="form-control" id="tooling-cost" min="0" step="0.01" value="0">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="save-operation-btn">Save Operation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <!-- Toasts will be inserted here by JavaScript -->
+</div>
+
+<!-- Add data-job-id to body for JavaScript -->
+<script>
+    document.body.dataset.jobId = "{{ job.id }}";
+</script>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/parts-management.js') }}"></script>
+{% endblock %}

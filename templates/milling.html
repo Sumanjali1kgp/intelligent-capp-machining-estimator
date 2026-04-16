@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milling Operations - IIT Kharagpur</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Additional styles specific to milling page */
+        .processes-container {
+            margin: 20px 0;
+        }
+        .process-entry {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #002b5c;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary { background-color: #002b5c; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn-info { background-color: #17a2b8; color: white; }
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .result-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 8px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <img src="{{ url_for('static', filename='images/iitkgp-logo.png') }}" alt="IIT Kharagpur Logo" class="logo">
+        <h1 class="app-title">Central Workshop, IIT Kharagpur</h1>
+    </div>
+
+    <div class="container">
+        <h1 class="page-title">Milling Operations</h1>
+        
+        <div class="content-box">
+            <div class="sidebar">
+                <a href="{{ url_for('index') }}" class="nav-link"><i class="fas fa-home"></i> Home</a>
+                <a href="{{ url_for('lathe') }}" class="nav-link"><i class="fas fa-cog"></i> Lathe Operations</a>
+                <a href="{{ url_for('milling') }}" class="nav-link active"><i class="fas fa-cogs"></i> Milling Operations</a>
+            </div>
+            
+            <div class="main-content">
+                <div class="operation-controls">
+                    <div class="form-group">
+                        <label for="material">JOB MATERIAL:</label>
+                        <select id="material" class="form-control" onchange="addMaterial()">
+                        <option value="select">Select Material</option>
+                        <option value="Mild Steel">Mild Steel</option>
+                        <option value="aluminium">Aluminum</option>
+                        <option value="brass">Brass</option>
+                        <option value="copper">Copper</option>
+                        <option value="stainlesssteel">Stainless Steel</option>
+                    </select>
+                </p>
+                <div id="home">
+                    <div class="hd"><h2> Select the Operation</h2></div>
+        <select id="optionSelect" onchange="addProcess()">
+        <option value="select" disabled selected>--Select Process--</option>
+        <option value="slabmilling">Slab Milling</option>
+        <option value="facemilling">Face Milling</option>
+        <option value="endmilling">End Milling</option>
+        </select>  
+                 <div id="formContainer"></div>
+                  <button onclick="calculateTotalTime()">Calculate Total Time</button>
+                  <h2>Cumulative Total Time: <span id="totalTime">0</span> minutes</h2>
+
+  <div class="result">
+  <button onclick="clearAll()">Clear All</button>
+  <button onclick="exportToPDF()">Export to PDF</button>
+</div>
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+     let processCount=0;
+ 
+    function addProcess() {
+      const selected = document.getElementById('optionSelect').value;
+      if (!selected) return;
+
+
+      const container = document.getElementById('formContainer');
+       if (!container.classList.contains('form-container-active')) {
+    container.classList.add('form-container-active');
+  }
+      const entryId = `process_${processCount++}`;
+
+      let html = `<div class="process-entry" id="${entryId}">
+          <h3>${selected.charAt(0).toUpperCase() + selected.slice(1)} (${entryId})</h3>`; 
+
+       switch (selected) {
+        case 'slabmilling':
+        case 'facemilling':
+        case 'endmilling':
+         html += `
+            <label>Length (mm): <input type="number" class="length"></label>
+            <label>Width (mm): <input type="number" class="length"></label>
+            <label>Height (mm): <input type="number" class="height"></label>
+            <label>Thickness(mm): <input type="number" class="thickness"></label>
+            <label>Feed(mm/rev): <input type="number" class="feed"></label>
+            <label>RPM (rev/min): <input type="number" class="rpm"></label>
+          `;
+          break;
+       }
+        html += `
+        <label>Time (min): <input type="text" class="time" readonly></label>
+        <button onclick="removeEntry('${entryId}')">Remove</button>
+      </div>`;
+      container.insertAdjacentHTML('beforeend', html);
+    } 
+    
+     function removeEntry(id) {
+      document.getElementById(id)?.remove();
+      calculateTotalTime();
+    }
+
+     function calculateTotalTime() {
+      let total = 0;
+      const entries = document.querySelectorAll('.process-entry');
+
+      <!-- const extraTimes={
+        facing: 10,
+        turning: 20,
+        drilling:20,
+        boring: 15,
+        threading:3,
+       
+      } -->
+    
+    entries.forEach(entry=> {
+        const process = entry.querySelector('h3').innerText.split(' ')[0].toLowerCase();
+        const length = parseFloat(entry.querySelector('.length')?.value);
+        const width = parseFloat(entry.querySelector('.length')?.value);
+        const height = parseFloat(entry.querySelector('.height')?.value);
+        const thickness = parseFloat(entry.querySelector('.thickness')?.value);
+        const feed = parseFloat(entry.querySelector('.feed')?.value);
+        const rpm = parseFloat(entry.querySelector('.rpm')?.value);
+        let timeField = entry.querySelector('.time'); 
+
+                 let time = 0;
+        switch (process) {
+          case 'slabmilling':
+           if (!isNaN(length) && !isNaN(feed) && feed > 0) {
+              time = (length/ feed);
+           }
+           break;
+        
+          case 'endmilling':
+           if (!isNaN(start) && !isNaN(feed) && feed > 0) {
+              time = (length/ feed);
+           }
+           break;
+
+          case 'facemilling':
+           if (!isNaN(length) && !isNaN(feed) && feed > 0) {
+              time = (length/feed);
+           }
+           break;
+        }
+        const extra =extraTimes[process]|| 0;
+
+
+        if (!isNaN(time) && time > 0) {
+            const timeWithExtra = time +extra;
+          timeField.value = timeWithExtra.toFixed(2);
+          total += timeWithExtra;
+        } else {
+          timeField.value = 'Invalid';
+        }
+      });
+      const restTime = 50;
+  const finalTotal = total + restTime;
+     
+
+
+      document.getElementById('totalTime').innerText = finalTotal.toFixed(2);
+    }
+
+     function clearAll() {
+      document.getElementById('formContainer').innerHTML = '';
+      document.getElementById('formContainer').classList.remove('form-container-active');
+      document.getElementById('totalTime').innerText = '0';
+      processCount = 0;
+      document.getElementById('optionSelect').value = '';
+    }
+     async function exportToPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 10;
+      doc.text('Machining Time Report', 10, y);
+      y += 10;
+
+
+      const entries = document.querySelectorAll('.process-entry');
+      entries.forEach(entry => {
+        const title = entry.querySelector('h3').innerText;
+        const inputs = entry.querySelectorAll('input');
+        const values = Array.from(inputs).map(input => input.value);
+        doc.text(`${title}`, 10, y);
+        y += 8;
+        doc.text(`Inputs: ${values.join(', ')}`, 10, y);
+        y += 10;
+      });
+
+
+      doc.text(`Total Time: ${document.getElementById('totalTime').innerText} min`, 10, y);
+      doc.save('machining_time_report.pdf');
+    }
+     
+</script>
+</div>
+</body>
+</html>

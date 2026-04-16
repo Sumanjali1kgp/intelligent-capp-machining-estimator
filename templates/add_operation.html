@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}Add Operation - {{ part.name }} - {{ job.name }} - Machining Calculator{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('job.list_jobs') }}">Jobs</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('job.view_job', job_id=job.id) }}">{{ job.name }}</a></li>
+                <li class="breadcrumb-item">Part: {{ part.name }}</li>
+                <li class="breadcrumb-item active" aria-current="page">Add Operation</li>
+            </ol>
+        </nav>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Add New Operation to {{ part.name }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="operationForm">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="operationType" class="form-label">Operation Type</label>
+                                <select class="form-select" id="operationType" name="operation_type" required>
+                                    <option value="" selected disabled>Select operation type</option>
+                                    <option value="turning">Turning</option>
+                                    <option value="facing">Facing</option>
+                                    <option value="drilling">Drilling</option>
+                                    <option value="boring">Boring</option>
+                                    <option value="milling">Milling</option>
+                                    <option value="threading">Threading</option>
+                                    <option value="grooving">Grooving</option>
+                                    <option value="knurling">Knurling</option>
+                                    <option value="reaming">Reaming</option>
+                                    <option value="tapping">Tapping</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="operationName" class="form-label">Operation Name</label>
+                                <input type="text" class="form-control" id="operationName" name="operation_name" required>
+                                <div class="form-text">E.g., 'Rough Turning', 'Finish Boring', 'Drill Holes'</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="machiningTime" class="form-label">Machining Time (minutes)</label>
+                                <input type="number" class="form-control" id="machiningTime" name="machining_time" 
+                                       step="0.01" min="0.01" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="machiningCost" class="form-label">Machining Cost (₹)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" class="form-control" id="machiningCost" name="machining_cost" 
+                                           step="0.01" min="0" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="toolingCost" class="form-label">Tooling Cost (₹)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" class="form-control" id="toolingCost" name="tooling_cost" 
+                                           step="0.01" min="0" value="0.00">
+                                </div>
+                                <div class="form-text">One-time cost for any special tooling required</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div id="operationParameters">
+                                <!-- Dynamic parameters will be loaded here based on operation type -->
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i> Select an operation type to see specific parameters
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end border-top pt-3">
+                        <a href="{{ url_for('job.view_job', job_id=job.id) }}" class="btn btn-outline-secondary me-md-2">
+                            Cancel
+                        </a>
+                        <button type="submit" name="add_another" value="true" class="btn btn-outline-primary me-md-2">
+                            <i class="bi bi-plus-circle"></i> Save & Add Another
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Operation
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        {% if part.operations %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Existing Operations for {{ part.name }}</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Operation</th>
+                            <th>Type</th>
+                            <th>Time (min)</th>
+                            <th>Cost (₹)</th>
+                            <th>Tooling (₹)</th>
+                            <th>Total (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for op in part.operations %}
+                        <tr>
+                            <td>{{ op.name }}</td>
+                            <td><span class="badge bg-info">{{ op.type|title }}</span></td>
+                            <td>{{ "%.2f"|format(op.machining_time) }}</td>
+                            <td>₹{{ "%.2f"|format(op.machining_cost) }}</td>
+                            <td>₹{{ "%.2f"|format(op.tooling_cost) }}</td>
+                            <td><strong>₹{{ "%.2f"|format(op.machining_cost + op.tooling_cost) }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                        {% if part.operations %}
+                        <tr class="table-active fw-bold">
+                            <td colspan="2">Part Total</td>
+                            <td>{{ "%.2f"|format(part.operations|sum(attribute='machining_time')) }}</td>
+                            <td>₹{{ "%.2f"|format(part.operations|sum(attribute='machining_cost')) }}</td>
+                            <td>₹{{ "%.2f"|format(part.operations|sum(attribute='tooling_cost')) }}</td>
+                            <td>₹{{ "%.2f"|format(
+                                part.operations|sum(attribute='machining_cost') + 
+                                part.operations|sum(attribute='tooling_cost')
+                            ) }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Operation type specific parameters
+const operationParameters = {
+    'turning': `
+        <h5 class="mb-3">Turning Parameters</h5>
+        <div class="mb-3">
+            <label for="diameter" class="form-label">Diameter (mm)</label>
+            <input type="number" class="form-control" id="diameter" name="diameter" step="0.01" min="0.01">
+        </div>
+        <div class="mb-3">
+            <label for="length" class="form-label">Length (mm)</label>
+            <input type="number" class="form-control" id="length" name="length" step="0.01" min="0.01">
+        </div>
+        <div class="mb-3">
+            <label for="depthOfCut" class="form-label">Depth of Cut (mm)</label>
+            <input type="number" class="form-control" id="depthOfCut" name="depth_of_cut" step="0.01" min="0.01">
+        </div>
+        <div class="mb-3">
+            <label for="feedRate" class="form-label">Feed Rate (mm/rev)</label>
+            <input type="number" class="form-control" id="feedRate" name="feed_rate" step="0.001" min="0.001">
+        </div>
+        <div class="mb-3">
+            <label for="cuttingSpeed" class="form-label">Cutting Speed (m/min)</label>
+            <input type="number" class="form-control" id="cuttingSpeed" name="cutting_speed" step="0.1" min="0.1">
+        </div>
+    `,
+    'facing': `
+        <h5 class="mb-3">Facing Parameters</h5>
+        <div class="mb-3">
+            <label for="diameter" class="form-label">Diameter (mm)</label>
+            <input type="number" class="form-control" id="diameter" name="diameter" step="0.01" min="0.01">
+        </div>
+        <div class="mb-3">
+            <label for="feedRate" class="form-label">Feed Rate (mm/rev)</label>
+            <input type="number" class="form-control" id="feedRate" name="feed_rate" step="0.001" min="0.001">
+        </div>
+        <div class="mb-3">
+            <label for="cuttingSpeed" class="form-label">Cutting Speed (m/min)</label>
+            <input type="number" class="form-control" id="cuttingSpeed" name="cutting_speed" step="0.1" min="0.1">
+        </div>
+    `,
+    'drilling': `
+        <h5 class="mb-3">Drilling Parameters</h5>
+        <div class="mb-3">
+            <label for="diameter" class="form-label">Hole Diameter (mm)</label>
+            <input type="number" class="form-control" id="diameter" name="diameter" step="0.01" min="0.1">
+        </div>
+        <div class="mb-3">
+            <label for="depth" class="form-label">Hole Depth (mm)</label>
+            <input type="number" class="form-control" id="depth" name="depth" step="0.1" min="0.1">
+        </div>
+        <div class="mb-3">
+            <label for="feedRate" class="form-label">Feed Rate (mm/rev)</label>
+            <input type="number" class="form-control" id="feedRate" name="feed_rate" step="0.001" min="0.001">
+        </div>
+        <div class="mb-3">
+            <label for="cuttingSpeed" class="form-label">Cutting Speed (m/min)</label>
+            <input type="number" class="form-control" id="cuttingSpeed" name="cutting_speed" step="0.1" min="0.1">
+        </div>
+    `,
+    // Add more operation types as needed
+};
+
+// Update operation parameters when operation type changes
+document.getElementById('operationType').addEventListener('change', function() {
+    const opType = this.value;
+    const paramsContainer = document.getElementById('operationParameters');
+    
+    if (opType in operationParameters) {
+        paramsContainer.innerHTML = operationParameters[opType];
+    } else {
+        paramsContainer.innerHTML = `
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No specific parameters required for this operation type.
+            </div>
+        `;
+    }
+});
+
+// Format currency inputs
+['machiningCost', 'toolingCost'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('blur', function(e) {
+            let value = parseFloat(e.target.value);
+            if (!isNaN(value)) {
+                e.target.value = value.toFixed(2);
+            }
+        });
+    }
+});
+
+// Format time input
+document.getElementById('machiningTime').addEventListener('blur', function(e) {
+    let value = parseFloat(e.target.value);
+    if (!isNaN(value)) {
+        e.target.value = value.toFixed(2);
+    }
+});
+
+// Auto-calculate button (optional)
+document.getElementById('calculateTime').addEventListener('click', function() {
+    // Add your calculation logic here based on the operation type and parameters
+    alert('Auto-calculation will be implemented based on the selected operation type and parameters.');
+});
+</script>
+{% endblock %}

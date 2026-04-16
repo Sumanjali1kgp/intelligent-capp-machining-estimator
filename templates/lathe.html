@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lathe Operations - IIT Kharagpur</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='lathe.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="lathe-page" data-page="lathe">
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-bar">
+                    <img src="{{ url_for('static', filename='images/iitkgp_logo.png') }}" alt="IIT Kharagpur Logo" class="iit-logo">
+                    <div class="institute-info">
+                        <h1>Central Workshop</h1>
+                        <p class="subheading">Indian Institute of Technology Kharagpur | Lathe Operations</p>
+                    </div>
+                </div>
+                <nav class="main-nav">
+                    <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+                    <a href="{{ url_for('lathe') }}" class="nav-link active">Lathe</a>
+                    <a href="{{ url_for('milling') }}" class="nav-link">Milling</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="lathe-shell">
+        <section class="lathe-hero">
+            <div class="container">
+                <div class="hero-copy">
+                    <p class="eyebrow">Unified Workspace</p>
+                    <h2>Build, calculate, and save machining jobs from one clean flow.</h2>
+                    <p class="hero-text">
+                        The workspace below keeps job setup, process inputs, time totals, cost breakdowns,
+                        and saved jobs synchronized through a single API-driven path.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="container lathe-workspace">
+            <div id="statusBanner" class="status-banner hidden" role="status" aria-live="polite"></div>
+
+            <div class="workspace-grid">
+                <section class="workspace-card">
+                    <div class="section-heading-row">
+                        <div>
+                            <p class="section-kicker">Current Workspace</p>
+                            <h3>Job Setup</h3>
+                        </div>
+                        <button type="button" id="resetWorkspaceBtn" class="action-btn action-btn-secondary">Reset Workspace</button>
+                    </div>
+
+                    <form id="jobForm" class="stack-form">
+                        <div class="form-grid">
+                            <label class="field-group">
+                                <span>Job Name</span>
+                                <input id="jobNameInput" name="job_name" type="text" placeholder="Ex: Shaft Batch 01" required>
+                            </label>
+                            <label class="field-group">
+                                <span>Client Name</span>
+                                <input id="clientNameInput" name="client_name" type="text" placeholder="Optional client or department">
+                            </label>
+                        </div>
+                        <div class="form-grid">
+                            <label class="field-group">
+                                <span>Primary Part Name</span>
+                                <input id="partNameInput" name="part_name" type="text" placeholder="Ex: Main Shaft">
+                            </label>
+                            <label class="field-group">
+                                <span>Job Material</span>
+                                <select id="materialSelect" name="material_id">
+                                    <option value="">Select material</option>
+                                </select>
+                            </label>
+                        </div>
+                        <label class="field-group">
+                            <span>Description</span>
+                            <textarea id="jobDescriptionInput" name="description" rows="3" placeholder="Short production notes or machining scope"></textarea>
+                        </label>
+                    </form>
+
+                    <div id="selectedJobSummary" class="selected-job-summary">
+                        <p class="summary-empty">No saved job is currently loaded. Start a new one or open an existing job.</p>
+                    </div>
+
+                    <div class="toolbar-row">
+                        <button type="button" id="saveJobBtn" class="action-btn action-btn-primary">
+                            <i class="fas fa-save"></i>
+                            <span>Save Job</span>
+                        </button>
+                        <button type="button" id="duplicateCurrentJobBtn" class="action-btn action-btn-secondary" disabled>
+                            <i class="fas fa-copy"></i>
+                            <span>Duplicate Job</span>
+                        </button>
+                        <button type="button" id="exportShopBtn" class="action-btn action-btn-secondary" disabled>
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Shop PDF</span>
+                        </button>
+                        <button type="button" id="exportCustomerBtn" class="action-btn action-btn-secondary" disabled>
+                            <i class="fas fa-file-export"></i>
+                            <span>Customer PDF</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="workspace-card">
+                    <div class="section-heading-row">
+                        <div>
+                            <p class="section-kicker">Stored Jobs</p>
+                            <h3>Saved Workspace</h3>
+                        </div>
+                        <button type="button" id="refreshJobsBtn" class="action-btn action-btn-secondary">Refresh</button>
+                    </div>
+                    <div id="jobsList" class="jobs-list">
+                        <p class="summary-empty">Loading jobs...</p>
+                    </div>
+                </section>
+
+                <section class="workspace-card workspace-card-wide">
+                    <div class="section-heading-row">
+                        <div>
+                            <p class="section-kicker">Process Definition</p>
+                            <h3>Operation Builder</h3>
+                        </div>
+                        <button type="button" id="addProcessBtn" class="action-btn action-btn-primary" disabled>
+                            <i class="fas fa-plus"></i>
+                            <span>Add Process</span>
+                        </button>
+                    </div>
+                    <p class="section-note">
+                        Select a material first, then add feature-based operation cards. Each card calculates independently and feeds one shared total.
+                    </p>
+                    <div id="processList" class="process-list">
+                        <div class="empty-process-state">
+                            <h4>No process cards yet</h4>
+                            <p>Add a material and create your first operation card to begin calculations.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="workspace-card">
+                    <div class="section-heading-row">
+                        <div>
+                            <p class="section-kicker">Manual Adjustments</p>
+                            <h3>Time Inputs</h3>
+                        </div>
+                    </div>
+                    <div class="form-grid compact-grid">
+                        <label class="field-group">
+                            <span>Setup Time (min)</span>
+                            <input id="manualSetupTime" type="number" min="0" step="0.01" value="0">
+                        </label>
+                        <label class="field-group">
+                            <span>Tool Change Time (min)</span>
+                            <input id="manualToolTime" type="number" min="0" step="0.01" value="0">
+                        </label>
+                        <label class="field-group">
+                            <span>Idle Time (min)</span>
+                            <input id="manualIdleTime" type="number" min="0" step="0.01" value="0">
+                        </label>
+                        <label class="field-group">
+                            <span>Miscellaneous Time (min)</span>
+                            <input id="manualMiscTime" type="number" min="0" step="0.01" value="0">
+                        </label>
+                    </div>
+                </section>
+
+                <section class="workspace-card">
+                    <div class="section-heading-row">
+                        <div>
+                            <p class="section-kicker">Cost Inputs</p>
+                            <h3>Cost Configuration</h3>
+                        </div>
+                    </div>
+                    <div class="form-grid compact-grid">
+                        <label class="field-group">
+                            <span>Material Cost (INR)</span>
+                            <input id="materialCostInput" type="number" min="0" step="0.01" value="0">
+                        </label>
+                        <label class="field-group">
+                            <span>Labor Rate (INR/hr)</span>
+                            <input id="laborRateInput" type="number" min="0" step="0.01" value="0">
+                        </label>
+                        <label class="field-group">
+                            <span>Tool Cost per Use (INR)</span>
+                            <input id="toolCostInput" type="number" min="0" step="0.01" value="0">
+                        </label>
+                        <label class="field-group">
+                            <span>Miscellaneous Cost (INR)</span>
+                            <input id="miscCostInput" type="number" min="0" step="0.01" value="0">
+                        </label>
+                    </div>
+                </section>
+
+                <section class="workspace-card workspace-card-wide">
+                    <div class="section-heading-row">
+                        <div>
+                            <p class="section-kicker">Aggregated Output</p>
+                            <h3>Results</h3>
+                        </div>
+                    </div>
+
+                    <div class="results-grid">
+                        <article class="result-panel">
+                            <h4>Time Breakdown</h4>
+                            <dl class="metric-list">
+                                <div><dt>Machining Time</dt><dd id="machiningTime">0.00 min</dd></div>
+                                <div><dt>Idle Time</dt><dd id="idleTime">0.00 min</dd></div>
+                                <div><dt>Setup Time</dt><dd id="setupTime">0.00 min</dd></div>
+                                <div><dt>Tool Change Time</dt><dd id="toolTime">0.00 min</dd></div>
+                                <div><dt>Miscellaneous Time</dt><dd id="miscTime">0.00 min</dd></div>
+                                <div class="metric-total"><dt>Total Time</dt><dd id="totalTime">0.00 min</dd></div>
+                            </dl>
+                        </article>
+
+                        <article class="result-panel">
+                            <h4>Cost Breakdown</h4>
+                            <dl class="metric-list">
+                                <div><dt>Material Cost</dt><dd id="materialCost">INR 0.00</dd></div>
+                                <div><dt>Setup + Idle Cost</dt><dd id="setupIdleCost">INR 0.00</dd></div>
+                                <div><dt>Machining Cost</dt><dd id="machiningCost">INR 0.00</dd></div>
+                                <div><dt>Tooling Cost</dt><dd id="toolingCost">INR 0.00</dd></div>
+                                <div><dt>Miscellaneous Cost</dt><dd id="miscCost">INR 0.00</dd></div>
+                                <div><dt>Raw Cost</dt><dd id="totalRawCost">INR 0.00</dd></div>
+                                <div><dt>Overhead (40%)</dt><dd id="overheadCost">INR 0.00</dd></div>
+                                <div class="metric-total"><dt>Final Cost</dt><dd id="finalCost">INR 0.00</dd></div>
+                            </dl>
+                        </article>
+
+                        <article class="result-panel">
+                            <h4>Cost Distribution</h4>
+                            <div class="chart-panel">
+                                <canvas id="costChart" aria-label="Cost breakdown pie chart"></canvas>
+                            </div>
+                            <p class="chart-caption">Visual cost contribution by machining, setup, tooling, overhead, material, and miscellaneous factors.</p>
+                        </article>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IIT Kharagpur - Machining Cost Estimator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <!-- Favicon -->
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+</head>
+
+<body>
+    <!-- Header Section -->
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-bar">
+                    <img src="{{ url_for('static', filename='images/iitkgp-logo.png') }}" alt="IIT Kharagpur Logo" class="iit-logo">
+                    <div class="institute-info">
+                        <h1>Central Workshop</h1>
+                        <p class="subheading">Indian Institute of Technology Kharagpur | Precision Manufacturing & Estimation</p>
+                    </div>
+                </div>
+                <nav class="main-nav">
+                    <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+                    <a href="#features" class="nav-link">Features</a>
+                    <a href="{{ url_for('lathe') }}" class="nav-link">Lathe</a>
+                    <a href="{{ url_for('milling') }}" class="nav-link">Milling</a>
+                    <a href="#contact" class="nav-link">Contact</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h2>Machining Cost Estimator</h2>
+                <p>Your intelligent assistant for estimating machining time and cost across a range of workshop operations.</p>
+                <div class="cta-buttons hero-buttons">
+                    <a href="{{ url_for('lathe') }}" class="btn btn-primary">Start Lathe Operations</a>
+                    <a href="{{ url_for('milling') }}" class="btn btn-outline">Milling Operations</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-heading">Key Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>Precision Calculations</h3>
+                    <p>Engineered with industry-standard formulas to ensure reliable machining time and cost estimations.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Export Reports</h3>
+                    <p>Generate downloadable PDFs for quoting, documentation, and analysis.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Multiple Operation Support</h3>
+                    <p>Chain together multiple machining operations for a comprehensive time and cost summary.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Built for Engineers</h3>
+                    <p>Designed for students, professionals, and industry experts at IIT Kharagpur and beyond.</p>
+                </div>
+            </div>
+
+            <h2 class="section-heading">Get Started</h2>
+            <p class="section-subtext">Choose your operation type to begin estimating machining time and costs:</p>
+            <div class="operation-links">
+                <a href="{{ url_for('lathe') }}" class="operation-btn">Lathe Operations</a>
+                <a href="{{ url_for('milling') }}" class="operation-btn">Milling Operations</a>
+            </div>
+
+            <h2 class="section-heading">About This Tool</h2>
+            <p>This Machining Cost Estimator is developed by the Central Workshop & Instrument Services Section, IIT Kharagpur. It's a modern solution for improving efficiency in process planning, quoting, and academic training in machining operations.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{{ url_for('index') }}">Home</a></li>
+                        <li><a href="{{ url_for('lathe') }}">Lathe Operations</a></li>
+                        <li><a href="{{ url_for('milling') }}">Milling Operations</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4>Contact</h4>
+                    <p>
+                        <i class="fas fa-map-marker-alt"></i> Central Workshop<br>
+                        IIT Kharagpur, West Bengal 721302<br>
+                        <i class="fas fa-envelope"></i> cwiss@iitkgp.ac.in
+                    </p>
+                </div>
+
+                <div>
+                    <h4>About CWISS</h4>
+                    <p>The Central Workshop & Instrument Services Section (CWISS) at IIT Kharagpur provides comprehensive technical support for teaching, research, and development activities across the institute.</p>
+                </div>
+            </div>
+
+            <p class="copyright">© 2025 Indian Institute of Technology Kharagpur. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Back to top button functionality
+        const backToTopButton = document.createElement('button');
+        backToTopButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+        backToTopButton.className = 'back-to-top';
+        backToTopButton.setAttribute('aria-label', 'Back to top');
+        document.body.appendChild(backToTopButton);
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.style.opacity = '1';
+                backToTopButton.style.visibility = 'visible';
+            } else {
+                backToTopButton.style.opacity = '0';
+                backToTopButton.style.visibility = 'hidden';
+            }
+        });
+
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Add smooth scrolling to all links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Shop Floor Report - {{ data.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reports.css', _external=True) }}">
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; }
+        .header { text-align: center; margin-bottom: 15px; }
+        .header img { height: 50px; }
+        .header h1 { margin: 3px 0; font-size: 16px; }
+        .header h2 { margin: 3px 0; font-size: 14px; color: #333; }
+        h3 { margin: 12px 0 6px; font-size: 13px; color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 2px; }
+        table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 11px; }
+        th, td { border: 1px solid #ddd; padding: 5px; text-align: left; }
+        th { background-color: #f0f4f8; font-weight: 600; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .bold { font-weight: bold; }
+        .nowrap { white-space: nowrap; }
+        .page-break { page-break-before: always; }
+        .signature { margin-top: 20px; }
+        .signature-line { width: 200px; border-top: 1px solid #000; margin: 30px 0 5px; }
+        .section { margin-bottom: 15px; }
+        .operation-params { font-family: monospace; font-size: 10px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{{ url_for('static', filename='images/iitkgp_logo.png', _external=True) }}" alt="IIT Kharagpur Logo">
+        <h1>Central Workshop & Instrument Service Section</h1>
+        <h2>Indian Institute of Technology Kharagpur</h2>
+        <h2>Shop Floor Machining Report</h2>
+    </div>
+
+    <div class="job-info">
+        <table style="width: 100%; border: none; margin-bottom: 10px;">
+            <tr>
+                <td style="border: none; width: 50%; vertical-align: top;">
+                    <p><span class="bold">Job Name:</span> {{ data.name or 'N/A' }}</p>
+                    <p><span class="bold">Client:</span> {{ data.client_name or 'N/A' }}</p>
+                    <p><span class="bold">Job ID:</span> {{ data.id or '—' }}</p>
+                </td>
+                <td style="border: none; width: 50%; vertical-align: top; text-align: right;">
+                    <p><span class="bold">Date:</span> {{ generated_on.strftime("%d-%m-%Y %H:%M") }}</p>
+                    <p><span class="bold">Status:</span> {{ data.status or 'Draft' }}</p>
+                    <p><span class="bold">Priority:</span> {{ data.priority or 'Normal' }}</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Material Summary -->
+    <div class="section">
+        <h3>Material Information</h3>
+        <table>
+            <tr>
+                <th>Material</th>
+                <th>Dimensions</th>
+                <th>Qty</th>
+                <th>Machinability</th>
+                <th>Notes</th>
+            </tr>
+            {% for part in data.parts %}
+            <tr>
+                <td>{{ part.material_name or 'N/A' }}</td>
+                <td>
+                    {% if part.initial_diameter or part.initial_length %}
+                        {{ '⌀' if part.initial_diameter }}{{ '%.2f'|format(part.initial_diameter) if part.initial_diameter }}
+                        {{ '×' if part.initial_diameter and part.initial_length }}
+                        {{ '%.2f'|format(part.initial_length) if part.initial_length }} mm
+                    {% else %}-
+                    {% endif %}
+                </td>
+                <td class="text-center">{{ part.quantity or 1 }}</td>
+                <td class="text-center">{{ part.material_rating or '—' }}</td>
+                <td>{{ part.notes or '—' }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-center">No parts defined</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- Operations Details -->
+    {% for part in data.parts %}
+    {% if part.operations %}
+    <div class="section">
+        <h3>{{ part.name or 'Part ' + loop.index|string }} - Operations</h3>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Operation</th>
+                <th>Time (min)</th>
+                <th>Tooling</th>
+                {% if report_type == 'shop' %}
+                <th>Parameters</th>
+                {% endif %}
+            </tr>
+            {% for op in part.operations %}
+            <tr>
+                <td class="text-center">{{ loop.index }}</td>
+                <td class="nowrap">{{ op.operation_name or 'Operation ' + loop.index|string }}</td>
+                <td class="text-right">{{ '%.2f'|format(op.machining_time or 0) }}</td>
+                <td class="text-right">{{ '%.2f'|format(op.tooling_cost or 0) }}</td>
+                {% if report_type == 'shop' %}
+                <td class="operation-params">
+                    {% if op.parameters %}
+                        {% for key, value in op.parameters.items() %}
+                            <span class="nowrap">{{ key }}: {{ value }}{% if not loop.last %}; {% endif %}</span>
+                        {% endfor %}
+                    {% else %}-
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Time and Cost Summary -->
+    <div class="section">
+        <div style="display: flex; gap: 20px;">
+            <div style="flex: 1;">
+                <h3>Time Breakdown (minutes)</h3>
+                <table>
+                    <tr><td>Machining</td><td class="text-right">{{ '%.2f'|format(data.total_machining_time or 0) }}</td></tr>
+                    <tr><td>Setup</td><td class="text-right">{{ '%.2f'|format(data.total_setup_time or 0) }}</td></tr>
+                    <tr><td>Idle</td><td class="text-right">{{ '%.2f'|format(data.total_idle_time or 0) }}</td></tr>
+                    <tr><td>Tool Change</td><td class="text-right">{{ '%.2f'|format(data.total_tool_time or 0) }}</td></tr>
+                    <tr><td>Misc</td><td class="text-right">{{ '%.2f'|format(data.total_misc_time or 0) }}</td></tr>
+                    <tr class="bold"><td>Total Time</td><td class="text-right">{{ '%.2f'|format(data.total_time or 0) }}</td></tr>
+                </table>
+            </div>
+            <div style="flex: 1;">
+                <h3>Cost Summary (₹)</h3>
+                <table>
+                    <tr><td>Material</td><td class="text-right">{{ '%.2f'|format(data.material_cost or 0) }}</td></tr>
+                    <tr><td>Machining</td><td class="text-right">{{ '%.2f'|format(data.machining_cost or 0) }}</td></tr>
+                    <tr><td>Setup & Idle</td><td class="text-right">{{ '%.2f'|format(data.setup_idle_cost or 0) }}</td></tr>
+                    <tr><td>Tooling</td><td class="text-right">{{ '%.2f'|format(data.tooling_cost or 0) }}</td></tr>
+                    <tr><td>Misc</td><td class="text-right">{{ '%.2f'|format(data.misc_cost or 0) }}</td></tr>
+                    <tr class="bold"><td>Total Cost</td><td class="text-right">₹{{ '%.2f'|format(data.total_cost or 0) }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes and Signatures -->
+    <div class="section" style="margin-top: 20px;">
+        <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+            <div style="width: 45%;">
+                <div class="signature">
+                    <div class="signature-line"></div>
+                    <p>Prepared By</p>
+                </div>
+            </div>
+            <div style="width: 45%;">
+                <div class="signature">
+                    <div class="signature-line"></div>
+                    <p>Approved By</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer" style="margin-top: 30px; font-size: 10px; text-align: center; color: #666;">
+        <p>Generated by Machining Time-Cost Estimator | CWISS, IIT Kharagpur</p>
+        <p>Report generated on: {{ generated_on.strftime("%d-%m-%Y %H:%M") }}</p>
+    </div>
+</body>
+</html>
