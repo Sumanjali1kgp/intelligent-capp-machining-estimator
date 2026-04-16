@@ -91,9 +91,4 @@ The system transforms traditional **manual, experience-based machining estimatio
 **Sumanjali Chinnadandluru**
 IIT Kharagpur
 
----
-
-## 📜 License
-
-MIT License
 
