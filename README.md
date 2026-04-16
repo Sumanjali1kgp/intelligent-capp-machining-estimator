@@ -1,187 +1,135 @@
-# Machining Time and Cost Estimation Web Application
+# Intelligent CAPP-Based Machining Time and Cost Estimator
 
-A comprehensive web application for managing machining jobs, parts, and operations with real-time cost and time calculations.
+## Overview
 
-## Features
+This project presents a web-based **Computer-Aided Process Planning (CAPP)** system developed as part of a Bachelor Thesis Project at IIT Kharagpur.
 
-- **Job Management**: Create, view, edit, and delete machining jobs
-- **Part Management**: Add multiple parts to each job with material specifications
-- **Operation Management**: Define different machining operations for each part
-- **Real-time Calculations**: Automatic calculation of machining time and cost
-- **Material Database**: Built-in material properties and machining parameters
-- **Export Functionality**: Export job data to PDF and Excel formats
-- **Responsive Design**: Works on desktop and mobile devices
+The system automates machining time and cost estimation by replacing traditional manual calculations with a structured, data-driven approach.
+
+It is designed to support workshop environments such as CWISS (Central Workshop & Instrument Service Section).
+
+---
+
+## Key Features
+
+### Core Functionality
+
+* Job → Part → Operation workflow
+* Multi-operation support:
+
+  * Turning
+  * Drilling
+  * Boring
+  * Grooving
+  * Milling
+* Automatic machining time calculation
+* Cost estimation based on machining parameters
+
+### Advanced Features (BTP Phase II)
+
+* Constraint-based validation (safe machining conditions)
+* Intelligent warnings for invalid inputs
+* Cost breakdown visualization
+* Job saving and duplication
+* PDF report generation (customer & shop floor)
+
+---
 
 ## Tech Stack
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+), Bootstrap 5
-- **Backend**: Python 3.9+, Flask
-- **Database**: SQLite (development), MySQL/PostgreSQL (production)
-- **APIs**: RESTful API with JSON
-- **Authentication**: JWT (JSON Web Tokens)
-- **Dependency Management**: pip/requirements.txt
+* **Frontend:** HTML, CSS, JavaScript (Bootstrap)
+* **Backend:** Flask (Python)
+* **Database:** SQLite (SQLAlchemy ORM)
 
-## Prerequisites
+---
 
-- Python 3.9 or higher
-- pip (Python package manager)
-- MySQL or PostgreSQL (for production)
-- Node.js and npm (for frontend development)
+## System Architecture
 
-## Installation
+The system follows a modular design:
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/machining-calculator.git
-   cd machining-calculator
-   ```
+* Each machining operation is modeled independently
+* Parameters (feed, speed, depth of cut) are selected dynamically
+* Total machining time and cost are aggregated across operations
 
-2. **Create and activate a virtual environment**
-   ```bash
-   python -m venv venv
-   # On Windows
-   .\venv\Scripts\activate
-   # On macOS/Linux
-   source venv/bin/activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Set up environment variables**
-   Create a `.env` file in the root directory with the following content:
-   ```env
-   FLASK_APP=app.py
-   FLASK_ENV=development
-   SECRET_KEY=your-secret-key-here
-   DATABASE_URL=sqlite:///machining.db
-   ```
-
-5. **Initialize the database**
-   ```bash
-   flask db init
-   flask db migrate -m "Initial migration"
-   flask db upgrade
-   ```
-
-6. **Run the application**
-   ```bash
-   flask run
-   ```
-   The application will be available at `http://localhost:5000`
+---
 
 ## Project Structure
 
 ```
-machining-calculator/
-├── app/
-│   ├── __init__.py         # Application factory
-│   ├── models/             # Database models
-│   │   ├── __init__.py
-│   │   ├── job_models.py   # Job, Part, and Operation models
-│   │   ├── material.py     # Material model
-│   │   └── machining_parameter.py  # Machining parameters
-│   │
-│   ├── routes/             # Application routes
-│   │   ├── __init__.py
-│   │   ├── job_routes.py   # Job-related routes
-│   │   ├── part_routes.py  # Part-related routes
-│   │   └── operation_routes.py  # Operation-related routes
-│   │
-│   ├── static/             # Static files (CSS, JS, images)
-│   │   ├── css/
-│   │   ├── js/
-│   │   └── images/
-│   │
-│   └── templates/          # HTML templates
-│       ├── base.html       # Base template
-│       ├── jobs/           # Job-related templates
-│       ├── parts/          # Part-related templates
-│       └── operations/     # Operation-related templates
-│
-├── migrations/             # Database migrations
-├── tests/                  # Test files
-├── .env.example           # Example environment variables
-├── .gitignore
-├── config.py              # Configuration settings
-├── requirements.txt       # Python dependencies
-└── README.md              # This file
+├── app.py                 # Main Flask application
+├── models/               # Machining operation models
+├── routes/               # API and UI routes
+├── static/              # CSS, JS, images
+├── templates/           # HTML templates
+├── setup_database.py    # Database initialization
+├── requirements.txt     # Dependencies
+└── test_api.py          # Basic testing
 ```
 
-## API Documentation
+---
 
-The application provides a RESTful API for programmatic access. See the [API Documentation](API.md) for detailed information.
-
-## Development
-
-1. **Frontend Development**
-   ```bash
-   # Install frontend dependencies
-   cd static
-   npm install
-   
-   # Start development server
-   npm run dev
-   ```
-
-2. **Running Tests**
-   ```bash
-   # Run all tests
-   pytest
-   
-   # Run tests with coverage report
-   pytest --cov=app
-   ```
-
-3. **Code Style**
-   ```bash
-   # Format code with Black
-   black .
-   
-   # Lint code with flake8
-   flake8 .
-   ```
-
-## Deployment
-
-For production deployment, consider using:
-
-1. **Web Server**: Nginx or Apache
-2. **WSGI Server**: Gunicorn or uWSGI
-3. **Process Manager**: Systemd or Supervisor
-4. **Database**: MySQL or PostgreSQL
-
-Example deployment with Gunicorn and Nginx:
+## Installation & Setup
 
 ```bash
-# Install Gunicorn
-pip install gunicorn
+# Clone repository
+git clone https://github.com/Sumanjali1kgp/intelligent-capp-machining-estimator.git
+cd intelligent-capp-machining-estimator
 
-# Run the application with Gunicorn
-gunicorn -w 4 -b 127.0.0.1:8000 "app:create_app()"
+# Create virtual environment
+python -m venv .venv
+.venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Initialize database
+python setup_database.py
+
+# Run application
+python app.py
 ```
 
-## License
+Access the app at:
+http://localhost:5000
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+---
 
-## Contributing
+## Cost Components Considered
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+* Machining Cost
+* Setup Cost
+* Tooling Cost
+* Material Cost
+* Overhead Cost
 
-## Support
+---
 
-For support, please open an issue in the GitHub repository or contact the maintainers.
+## Key Contributions
 
-## Acknowledgments
+* Developed a structured CAPP workflow for machining estimation
+* Integrated database-driven machining parameters
+* Designed modular operation-based computation system
+* Implemented validation and decision-support features
 
-- [Bootstrap](https://getbootstrap.com/) for the responsive UI components
-- [Font Awesome](https://fontawesome.com/) for icons
-- [Flask](https://flask.palletsprojects.com/) for the web framework
-- [SQLAlchemy](https://www.sqlalchemy.org/) for the ORM
+---
+
+## Future Scope
+
+* CAD-based feature recognition
+* Machine learning for parameter optimization
+* Cloud deployment for multi-user access
+
+---
+
+## References
+
+* Machining Data Handbook
+* PSG Design Data Book
+* Kalpakjian – Manufacturing Engineering
+
+---
+
+## Author
+
+**Sumanjali Chinnadandluru**
+IIT Kharagpur
